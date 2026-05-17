@@ -11,7 +11,10 @@
         .showTrackerPage {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1em 2em;
+            /* Reserve space around Jellyfin's fixed AppBar:
+               - top: clears the 48px header so action buttons aren't intercepted by the transparent toolbar
+               - right: clears the Cast / Search / User icon cluster on the top-right */
+            padding: 4em 6em 1em 2em;
             font-family: inherit;
         }
 
