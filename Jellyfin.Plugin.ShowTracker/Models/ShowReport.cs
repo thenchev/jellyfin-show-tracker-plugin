@@ -66,6 +66,17 @@ public class ShowReport
     public string? ImageUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the matching strategy used to compare local episodes to TVMaze.
+    /// See <see cref="Services.EpisodeMatcher.MatchMode"/>.
+    /// </summary>
+    public string MatchMode { get; set; } = nameof(Services.EpisodeMatcher.MatchMode.BySeasonEpisode);
+
+    /// <summary>
+    /// Gets or sets a 0..1 score for how confident we are that the local library was correctly matched.
+    /// </summary>
+    public double MatchConfidence { get; set; } = 1.0;
+
+    /// <summary>
     /// Gets the total number of missing items (seasons counted as their episode count + individual episodes).
     /// </summary>
     public int TotalMissingCount => MissingEpisodes.Count;

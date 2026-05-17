@@ -20,13 +20,29 @@
     const scanBtn = document.getElementById('stScanBtn');
     const clearBtn = document.getElementById('stClearFilter');
 
+    // Jellyfin serializes our ASP.NET models as PascalCase. Normalize to
+    // camelCase so the rest of this file can use idiomatic JS names.
+    function normalizeKeys(v) {
+        if (Array.isArray(v)) return v.map(normalizeKeys);
+        if (v && typeof v === 'object' && v.constructor === Object) {
+            var out = {};
+            for (var k in v) {
+                if (Object.prototype.hasOwnProperty.call(v, k)) {
+                    out[k.charAt(0).toLowerCase() + k.slice(1)] = normalizeKeys(v[k]);
+                }
+            }
+            return out;
+        }
+        return v;
+    }
+
     // API helpers
     function getApiUrl(path) {
         return ApiClient.getUrl(path);
     }
 
     function apiFetch(path) {
-        return ApiClient.getJSON(getApiUrl(path));
+        return ApiClient.getJSON(getApiUrl(path)).then(normalizeKeys);
     }
 
     function apiPost(path) {
@@ -195,8 +211,17 @@
             ' · ' + show.totalEpisodesLocal + '/' + show.totalEpisodesOnTvMaze + ' eps' +
             ' · ' + show.totalSeasonsLocal + '/' + show.totalSeasonsOnTvMaze + ' seasons';
 
+        var matchHint = describeMatchMode(show.matchMode, show.matchConfidence);
+
         // Details
         var detailsHtml = '';
+
+        if (matchHint) {
+            detailsHtml += '<div class="st-detail-section">' +
+                '<h4>Match info</h4>' +
+                '<div style="color:#aaa;font-size:0.9em;">' + escapeHtml(matchHint) + '</div>' +
+                '</div>';
+        }
 
         if (show.missingSeasons.length > 0) {
             detailsHtml += '<div class="st-detail-section">' +
@@ -250,6 +275,23 @@
             '</div>' +
             '<div class="st-show-details">' + detailsHtml + '</div>' +
             '</div>';
+    }
+
+    function describeMatchMode(mode, confidence) {
+        if (!mode || mode === 'BySeasonEpisode') return '';
+        var pct = typeof confidence === 'number' ? Math.round(confidence * 100) + '% confident — ' : '';
+        switch (mode) {
+            case 'WithNameOrAirdateFallback':
+                return pct + 'Some episodes matched by title/airdate (season numbering differs from TVMaze).';
+            case 'ByAbsoluteNumbering':
+                return pct + 'Library uses absolute episode numbering; TVMaze season layout was flattened for comparison.';
+            case 'PossiblyWrongShow':
+                return 'Local episode count is much larger than TVMaze — the TVMaze match is probably wrong (check the show\'s TheTVDB/IMDB ID).';
+            case 'NoMatch':
+                return 'No episodes lined up with TVMaze — probable wrong-show match or completely renumbered library.';
+            default:
+                return pct + 'Match mode: ' + mode;
+        }
     }
 
     function groupEpisodesBySeason(episodes) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.1.0
+- Fix: dashboard page no longer stuck on "Loading scan results..." — corrected the embedded script's URL, moved inline styles into the page body so Jellyfin's config-page loader doesn't strip them, and normalized PascalCase responses on the client.
+- Improvement: smarter episode comparison that handles libraries using a different season layout than TVMaze. Falls back to title/airdate matching, detects absolute (anime-style) numbering, and flags shows where the TVMaze match is likely wrong (e.g. anime vs. live-action remake with the same name).
+- New per-show `MatchMode` and `MatchConfidence` fields, surfaced in the dashboard as a "Match info" note.
+
 ## v1.0.0.0
 - Initial release
 - TVMaze integration with rate limiting and caching

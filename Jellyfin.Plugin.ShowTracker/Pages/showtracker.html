@@ -3,6 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>Show Tracker</title>
+</head>
+<body>
+    <div id="ShowTrackerPage" data-role="page" class="page type-interior pluginConfigurationPage showTrackerPage"
+         data-require="emby-button">
     <style>
         .showTrackerPage {
             max-width: 1200px;
@@ -382,10 +386,6 @@
             .st-show-poster { display: none; }
         }
     </style>
-</head>
-<body>
-    <div id="ShowTrackerPage" data-role="page" class="page type-interior pluginConfigurationPage showTrackerPage"
-         data-require="emby-button">
 
         <div class="st-loading" id="stLoading">
             <div class="st-spinner"></div>
@@ -439,8 +439,7 @@
                 · Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>
             </div>
         </div>
+        <script type="text/javascript" src="configurationpage?name=showtrackerjs"></script>
     </div>
-
-    <script type="text/javascript" src="showtracker.js?v=1"></script>
 </body>
 </html>

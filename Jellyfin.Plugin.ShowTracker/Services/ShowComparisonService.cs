@@ -173,71 +173,69 @@ public class ShowComparisonService
             Recursive = true
         }).OfType<Episode>().ToList();
 
-        // Build a set of local episode keys (season, episode number)
-        var localEpisodeKeys = new HashSet<string>();
-        var localSeasonNumbers = new HashSet<int>();
-
-        foreach (var ep in localEpisodes)
-        {
-            if (ep.ParentIndexNumber.HasValue)
+        // Project local episodes into the shape the matcher consumes.
+        var localForMatcher = localEpisodes
+            .Select(ep => new EpisodeMatcher.LocalEpisode
             {
-                localSeasonNumbers.Add(ep.ParentIndexNumber.Value);
+                Season = ep.ParentIndexNumber,
+                Number = ep.IndexNumber,
+                NumberEnd = ep.IndexNumberEnd,
+                Name = ep.Name,
+                PremiereDate = ep.PremiereDate
+            })
+            .ToList();
 
-                if (ep.IndexNumber.HasValue)
-                {
-                    localEpisodeKeys.Add($"{ep.ParentIndexNumber.Value}x{ep.IndexNumber.Value}");
-                }
-            }
-        }
+        var localSeasonNumbers = localEpisodes
+            .Where(ep => ep.ParentIndexNumber.HasValue)
+            .Select(ep => ep.ParentIndexNumber!.Value)
+            .ToHashSet();
 
-        // Find missing episodes
-        var missingEpisodes = new List<MissingEpisode>();
-        foreach (var tvEp in tvMazeEpisodes)
-        {
-            if (!tvEp.Number.HasValue)
+        // Compare via the matcher (handles split cours, absolute numbering, wrong-show detection).
+        var matchResult = EpisodeMatcher.Match(tvMazeEpisodes, localForMatcher);
+
+        var missingEpisodes = matchResult.Missing
+            .Where(tvEp => tvEp.Number.HasValue)
+            .Select(tvEp => new MissingEpisode
             {
-                continue; // Skip episodes without a number (some specials)
-            }
+                SeasonNumber = tvEp.Season,
+                EpisodeNumber = tvEp.Number,
+                Name = tvEp.Name,
+                Airdate = tvEp.Airdate,
+                TvMazeUrl = tvEp.Url,
+                HasAired = tvEp.HasAired
+            })
+            .ToList();
 
-            var key = $"{tvEp.Season}x{tvEp.Number.Value}";
-            if (!localEpisodeKeys.Contains(key))
-            {
-                missingEpisodes.Add(new MissingEpisode
-                {
-                    SeasonNumber = tvEp.Season,
-                    EpisodeNumber = tvEp.Number,
-                    Name = tvEp.Name,
-                    Airdate = tvEp.Airdate,
-                    TvMazeUrl = tvEp.Url,
-                    HasAired = tvEp.HasAired
-                });
-            }
-        }
-
-        // Determine missing seasons (seasons on TVMaze with zero local episodes)
+        // Determine missing seasons (seasons on TVMaze with zero local episodes).
+        // Skip this when the library appears to use absolute numbering — every TVMaze season
+        // beyond #1 would otherwise be reported "missing" even though the episodes are present.
         var tvMazeSeasonNumbers = tvMazeEpisodes
             .Select(e => e.Season)
-            .Where(s => s > 0) // Exclude specials season (0)
+            .Where(s => s > 0)
             .Distinct()
             .ToHashSet();
 
         var tvMazeSeasons = await _tvMazeClient.GetSeasonsAsync(tvMazeShow.Id, cancellationToken).ConfigureAwait(false);
 
         var missingSeasons = new List<MissingSeason>();
-        foreach (var seasonNum in tvMazeSeasonNumbers)
+        if (matchResult.Mode != EpisodeMatcher.MatchMode.ByAbsoluteNumbering
+            && matchResult.Mode != EpisodeMatcher.MatchMode.PossiblyWrongShow)
         {
-            if (!localSeasonNumbers.Contains(seasonNum))
+            foreach (var seasonNum in tvMazeSeasonNumbers)
             {
-                var seasonInfo = tvMazeSeasons.FirstOrDefault(s => s.Number == seasonNum);
-                var episodesInSeason = tvMazeEpisodes.Count(e => e.Season == seasonNum);
-
-                missingSeasons.Add(new MissingSeason
+                if (!localSeasonNumbers.Contains(seasonNum))
                 {
-                    SeasonNumber = seasonNum,
-                    ExpectedEpisodeCount = episodesInSeason,
-                    PremiereDate = seasonInfo?.PremiereDate,
-                    TvMazeUrl = seasonInfo?.Url ?? tvMazeShow.Url
-                });
+                    var seasonInfo = tvMazeSeasons.FirstOrDefault(s => s.Number == seasonNum);
+                    var episodesInSeason = tvMazeEpisodes.Count(e => e.Season == seasonNum);
+
+                    missingSeasons.Add(new MissingSeason
+                    {
+                        SeasonNumber = seasonNum,
+                        ExpectedEpisodeCount = episodesInSeason,
+                        PremiereDate = seasonInfo?.PremiereDate,
+                        TvMazeUrl = seasonInfo?.Url ?? tvMazeShow.Url
+                    });
+                }
             }
         }
 
@@ -254,7 +252,9 @@ public class ShowComparisonService
             TotalEpisodesLocal = localEpisodes.Count,
             MissingSeasons = missingSeasons,
             MissingEpisodes = missingEpisodes,
-            ImageUrl = tvMazeShow.Image?.Medium
+            ImageUrl = tvMazeShow.Image?.Medium,
+            MatchMode = matchResult.Mode.ToString(),
+            MatchConfidence = matchResult.Confidence
         };
     }
 
