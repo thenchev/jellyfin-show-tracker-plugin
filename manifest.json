@@ -9,6 +9,14 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "1.0.3.1",
+        "changelog": "- Fix: the v1.0.3.0 sidebar entry didn't actually appear — Jellyfin gates main-menu items on `EnableInMainMenu`, not just `MenuSection`. Setting both now puts Show Tracker in the dashboard sidebar.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/thenchev/jellyfin-show-tracker-plugin/releases/download/v1.0.3.1/showtracker_1.0.3.1.zip",
+        "checksum": "3a908f7be81efd7cdde2b751aacd84e8",
+        "timestamp": "2026-05-17T16:49:49Z"
+      },
+      {
         "version": "1.0.3.0",
         "changelog": "- Improvement: the Show Tracker page now appears as its own entry in the Jellyfin Dashboard sidebar (Server section), instead of being buried under Dashboard → Plugins → My Plugins → Show Tracker.",
         "targetAbi": "10.11.0.0",
