@@ -13,20 +13,35 @@ public class TvMazeCache
     private readonly ConcurrentDictionary<string, CacheEntry> _memoryCache = new();
     private readonly ILogger<TvMazeCache> _logger;
     private readonly string _cacheDir;
+    private readonly Func<int> _ttlHoursProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TvMazeCache"/> class.
+    /// Production constructor — reads TTL from <see cref="Plugin.Instance"/> configuration.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     public TvMazeCache(ILogger<TvMazeCache> logger)
+        : this(
+            logger,
+            cacheDir: Plugin.Instance != null
+                ? Path.Combine(Plugin.Instance.DataPath, "cache", "tvmaze")
+                : Path.Combine(Path.GetTempPath(), "showtracker_cache"),
+            ttlHoursProvider: () => Plugin.Instance?.Configuration.CacheDurationHours ?? 12)
+    {
+    }
+
+    /// <summary>
+    /// Test-friendly constructor. Allows injecting an explicit cache directory and TTL provider
+    /// so the cache can be exercised without a running Jellyfin <see cref="Plugin"/> instance.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="cacheDir">Directory used for the on-disk tier.</param>
+    /// <param name="ttlHoursProvider">Callback returning the current TTL, in hours.</param>
+    public TvMazeCache(ILogger<TvMazeCache> logger, string cacheDir, Func<int> ttlHoursProvider)
     {
         _logger = logger;
-
-        var pluginInstance = Plugin.Instance;
-        _cacheDir = pluginInstance != null
-            ? Path.Combine(pluginInstance.DataPath, "cache", "tvmaze")
-            : Path.Combine(Path.GetTempPath(), "showtracker_cache");
-
+        _cacheDir = cacheDir;
+        _ttlHoursProvider = ttlHoursProvider;
         Directory.CreateDirectory(_cacheDir);
     }
 
@@ -40,7 +55,7 @@ public class TvMazeCache
     public bool TryGet<T>(string key, out T? value)
     {
         value = default;
-        var ttlHours = Plugin.Instance?.Configuration.CacheDurationHours ?? 12;
+        var ttlHours = _ttlHoursProvider();
 
         // Check memory cache first
         if (_memoryCache.TryGetValue(key, out var entry) && !entry.IsExpired(ttlHours))

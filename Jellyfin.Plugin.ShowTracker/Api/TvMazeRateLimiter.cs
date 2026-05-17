@@ -33,6 +33,7 @@ public class TvMazeRateLimiter
     public async Task WaitForSlotAsync(CancellationToken cancellationToken = default)
     {
         await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var holdsSemaphore = true;
         try
         {
             while (true)
@@ -62,14 +63,19 @@ public class TvMazeRateLimiter
                 {
                     _logger.LogDebug("Rate limit reached, waiting {WaitMs}ms", waitTime.TotalMilliseconds);
                     _semaphore.Release();
+                    holdsSemaphore = false;
                     await Task.Delay(waitTime, cancellationToken).ConfigureAwait(false);
                     await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    holdsSemaphore = true;
                 }
             }
         }
         finally
         {
-            _semaphore.Release();
+            if (holdsSemaphore)
+            {
+                _semaphore.Release();
+            }
         }
     }
 }

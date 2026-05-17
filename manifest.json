@@ -1,0 +1,12 @@
+[
+  {
+    "guid": "3754ea39-bfb5-43a2-a17b-25f7bc7fb15e",
+    "name": "Show Tracker",
+    "description": "Scans your TV library and cross-references with TVMaze to identify missing episodes and seasons. Provides a dashboard report, scheduled scanning, and a REST API.",
+    "overview": "Tracks missing TV episodes and seasons using TVMaze",
+    "owner": "thenchev",
+    "category": "General",
+    "imageUrl": "",
+    "versions": []
+  }
+]

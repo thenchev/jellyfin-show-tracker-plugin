@@ -26,13 +26,20 @@ public class ResultsStore
     /// </summary>
     /// <param name="logger">Logger instance.</param>
     public ResultsStore(ILogger<ResultsStore> logger)
+        : this(
+            logger,
+            dataPath: Plugin.Instance?.DataPath ?? Path.Combine(Path.GetTempPath(), "showtracker"))
+    {
+    }
+
+    /// <summary>
+    /// Test-friendly constructor allowing an explicit data path.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="dataPath">Directory where scan_results.json will be written.</param>
+    public ResultsStore(ILogger<ResultsStore> logger, string dataPath)
     {
         _logger = logger;
-
-        var pluginInstance = Plugin.Instance;
-        var dataPath = pluginInstance?.DataPath
-            ?? Path.Combine(Path.GetTempPath(), "showtracker");
-
         Directory.CreateDirectory(dataPath);
         _resultsPath = Path.Combine(dataPath, "scan_results.json");
     }

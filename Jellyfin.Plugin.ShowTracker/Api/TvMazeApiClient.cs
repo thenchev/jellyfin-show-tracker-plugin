@@ -32,16 +32,33 @@ public class TvMazeApiClient : IDisposable
         TvMazeRateLimiter rateLimiter,
         TvMazeCache cache,
         ILogger<TvMazeApiClient> logger)
+        : this(rateLimiter, cache, logger, httpMessageHandler: null)
+    {
+    }
+
+    /// <summary>
+    /// Test-friendly constructor accepting a custom <see cref="HttpMessageHandler"/>.
+    /// </summary>
+    /// <param name="rateLimiter">Rate limiter instance.</param>
+    /// <param name="cache">Cache instance.</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="httpMessageHandler">Handler used by the underlying <see cref="HttpClient"/>. Pass null for production defaults.</param>
+    public TvMazeApiClient(
+        TvMazeRateLimiter rateLimiter,
+        TvMazeCache cache,
+        ILogger<TvMazeApiClient> logger,
+        HttpMessageHandler? httpMessageHandler)
     {
         _rateLimiter = rateLimiter;
         _cache = cache;
         _logger = logger;
 
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(BaseUrl),
-            Timeout = TimeSpan.FromSeconds(30)
-        };
+        _httpClient = httpMessageHandler != null
+            ? new HttpClient(httpMessageHandler, disposeHandler: false)
+            : new HttpClient();
+
+        _httpClient.BaseAddress = new Uri(BaseUrl);
+        _httpClient.Timeout = TimeSpan.FromSeconds(30);
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
