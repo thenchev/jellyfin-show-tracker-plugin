@@ -214,6 +214,23 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: block;
+        }
+
+        .st-show-link {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .st-show-link:hover .st-show-poster,
+        .st-show-link.st-show-poster:hover {
+            outline: 2px solid #00a4dc;
+        }
+
+        a.st-show-name:hover {
+            color: #00a4dc;
+            text-decoration: underline;
         }
 
         .st-show-status {

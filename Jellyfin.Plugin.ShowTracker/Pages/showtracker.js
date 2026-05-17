@@ -181,6 +181,15 @@
             });
         });
 
+        // Library links inside the header navigate; don't let the click bubble
+        // up to the header's expand/collapse handler.
+        var libLinks = showListEl.querySelectorAll('.st-show-header .st-show-link');
+        libLinks.forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+
         // Attach dismiss buttons
         var dismissBtns = showListEl.querySelectorAll('.st-dismiss-btn');
         dismissBtns.forEach(function (btn) {
@@ -189,6 +198,13 @@
                 dismissShow(btn.dataset.id, btn);
             });
         });
+    }
+
+    function getLibraryUrl(jellyfinId) {
+        var serverId = (typeof ApiClient.serverId === 'function') ? ApiClient.serverId() : '';
+        var url = '#/details?id=' + encodeURIComponent(jellyfinId);
+        if (serverId) url += '&serverId=' + encodeURIComponent(serverId);
+        return url;
     }
 
     function renderShow(show) {
@@ -203,9 +219,11 @@
                 ? show.missingSeasons.length + ' season(s), ' + show.missingEpisodes.length + ' ep(s) missing'
                 : show.missingEpisodes.length + ' episode(s) missing';
 
-        var posterHtml = show.imageUrl
+        var libraryUrl = getLibraryUrl(show.jellyfinId);
+        var posterImg = show.imageUrl
             ? '<img class="st-show-poster" src="' + escapeHtml(show.imageUrl) + '" alt="" loading="lazy">'
             : '<div class="st-show-poster"></div>';
+        var posterHtml = '<a class="st-show-link" href="' + escapeHtml(libraryUrl) + '" title="Open in library">' + posterImg + '</a>';
 
         var statusText = (show.status || 'Unknown') +
             ' · ' + show.totalEpisodesLocal + '/' + show.totalEpisodesOnTvMaze + ' eps' +
@@ -267,7 +285,7 @@
             '<span class="st-indicator ' + indicatorClass + '"></span>' +
             posterHtml +
             '<div class="st-show-info">' +
-            '<div class="st-show-name">' + escapeHtml(show.showName) + '</div>' +
+            '<a class="st-show-name st-show-link" href="' + escapeHtml(libraryUrl) + '" title="Open in library">' + escapeHtml(show.showName) + '</a>' +
             '<div class="st-show-status">' + escapeHtml(statusText) + '</div>' +
             '</div>' +
             '<span class="st-show-badge ' + badgeClass + '">' + escapeHtml(badgeText) + '</span>' +

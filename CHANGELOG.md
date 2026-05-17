@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.2.0
+- Feature: clicking a show's poster or title in the dashboard now opens that show's page in your Jellyfin library (jumps straight to the seasons/episodes view). Expand/collapse on the rest of the row still works for inspecting missing episodes inline.
+
 ## v1.0.1.1
 - Fix: the "Scan Now" button was partially covered by Jellyfin's fixed top-right header — the top and right edges intercepted clicks. The page now reserves padding to clear the AppBar and the Cast/Search/User icon cluster.
 
