@@ -52,7 +52,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             new PluginPageInfo
             {
                 Name = "showtracker",
-                EmbeddedResourcePath = $"{GetType().Namespace}.Pages.showtracker.html"
+                EmbeddedResourcePath = $"{GetType().Namespace}.Pages.showtracker.html",
+                DisplayName = "Show Tracker",
+                MenuSection = "server",
+                MenuIcon = "tv"
             },
             new PluginPageInfo
             {

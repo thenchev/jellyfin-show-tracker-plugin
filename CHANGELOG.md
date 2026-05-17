@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.3.0
+- Improvement: the Show Tracker page now appears as its own entry in the Jellyfin Dashboard sidebar (Server section), instead of being buried under Dashboard → Plugins → My Plugins → Show Tracker.
+
 ## v1.0.2.0
 - Feature: clicking a show's poster or title in the dashboard now opens that show's page in your Jellyfin library (jumps straight to the seasons/episodes view). Expand/collapse on the rest of the row still works for inspecting missing episodes inline.
 
