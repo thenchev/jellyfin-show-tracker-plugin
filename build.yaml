@@ -1,0 +1,19 @@
+---
+name: "Show Tracker"
+guid: "3754ea39-bfb5-43a2-a17b-25f7bc7fb15e"
+version: "1.0.0.0"
+targetAbi: "10.11.0.0"
+framework: "net9.0"
+overview: "Tracks missing TV episodes and seasons using TVMaze"
+description: "Scans your TV library and cross-references with TVMaze to identify missing episodes and seasons. Provides a dashboard report, scheduled scanning, and a REST API."
+category: "General"
+owner: "thenchev"
+artifacts:
+  - "Jellyfin.Plugin.ShowTracker.dll"
+changelog: |
+  ## v1.0.0.0
+  - Initial release
+  - TVMaze integration with rate limiting and caching
+  - Dashboard page with missing episode reports
+  - Scheduled nightly scanning
+  - REST API for external integrations

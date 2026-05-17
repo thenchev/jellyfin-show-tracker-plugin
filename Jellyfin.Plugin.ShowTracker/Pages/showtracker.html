@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Show Tracker</title>
+    <style>
+        .showTrackerPage {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1em 2em;
+            font-family: inherit;
+        }
+
+        .st-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1em;
+            margin-bottom: 1.5em;
+        }
+
+        .st-header h1 {
+            margin: 0;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+        }
+
+        .st-meta {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .st-actions {
+            display: flex;
+            gap: 0.5em;
+        }
+
+        .st-btn {
+            padding: 0.5em 1.2em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .st-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .st-btn-primary {
+            background: #00a4dc;
+            color: #fff;
+        }
+
+        .st-btn-primary:hover:not(:disabled) {
+            background: #0088b8;
+        }
+
+        .st-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: inherit;
+        }
+
+        .st-btn-secondary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Summary Cards */
+        .st-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1em;
+            margin-bottom: 1.5em;
+        }
+
+        .st-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.2em;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .st-card-value {
+            font-size: 2em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .st-card-label {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 0.3em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .st-card-value.green { color: #4caf50; }
+        .st-card-value.red { color: #f44336; }
+        .st-card-value.orange { color: #ff9800; }
+        .st-card-value.blue { color: #00a4dc; }
+
+        /* Filters */
+        .st-filters {
+            display: flex;
+            gap: 0.8em;
+            margin-bottom: 1.2em;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .st-search {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.5em 0.8em;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            color: inherit;
+            font-size: 0.9em;
+        }
+
+        .st-search::placeholder {
+            color: #777;
+        }
+
+        .st-select {
+            padding: 0.5em 0.8em;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            color: inherit;
+            font-size: 0.9em;
+        }
+
+        .st-select option {
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        /* Show List */
+        .st-show-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+        }
+
+        .st-show {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .st-show:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .st-show-header {
+            display: flex;
+            align-items: center;
+            padding: 0.8em 1em;
+            cursor: pointer;
+            gap: 0.8em;
+            user-select: none;
+        }
+
+        .st-show-header:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .st-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .st-indicator.complete { background: #4caf50; }
+        .st-indicator.few-missing { background: #ff9800; }
+        .st-indicator.many-missing { background: #f44336; }
+
+        .st-show-poster {
+            width: 32px;
+            height: 46px;
+            object-fit: cover;
+            border-radius: 3px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .st-show-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .st-show-name {
+            font-weight: 600;
+            font-size: 0.95em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .st-show-status {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 0.15em;
+        }
+
+        .st-show-badge {
+            flex-shrink: 0;
+            padding: 0.25em 0.7em;
+            border-radius: 12px;
+            font-size: 0.78em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .st-show-badge.complete {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+        }
+
+        .st-show-badge.missing {
+            background: rgba(244, 67, 54, 0.12);
+            color: #f44336;
+        }
+
+        .st-show-badge.few {
+            background: rgba(255, 152, 0, 0.12);
+            color: #ff9800;
+        }
+
+        .st-chevron {
+            font-size: 0.8em;
+            color: #666;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .st-show.expanded .st-chevron {
+            transform: rotate(90deg);
+        }
+
+        .st-show-details {
+            display: none;
+            padding: 0 1em 1em 1em;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .st-show.expanded .st-show-details {
+            display: block;
+        }
+
+        .st-detail-section {
+            margin-top: 0.8em;
+        }
+
+        .st-detail-section h4 {
+            margin: 0 0 0.4em 0;
+            font-size: 0.85em;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .st-episode-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4em;
+        }
+
+        .st-episode-tag {
+            padding: 0.2em 0.5em;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-family: monospace;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .st-episode-tag.unaired {
+            background: rgba(156, 39, 176, 0.1);
+            color: #ce93d8;
+            border-color: rgba(156, 39, 176, 0.2);
+        }
+
+        .st-detail-actions {
+            display: flex;
+            gap: 0.5em;
+            margin-top: 0.8em;
+            flex-wrap: wrap;
+        }
+
+        .st-link {
+            color: #00a4dc;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+
+        .st-link:hover {
+            text-decoration: underline;
+        }
+
+        .st-dismiss-btn {
+            padding: 0.3em 0.8em;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 3px;
+            background: transparent;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .st-dismiss-btn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* Attribution */
+        .st-attribution {
+            margin-top: 2em;
+            padding-top: 1em;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.78em;
+            color: #666;
+            text-align: center;
+        }
+
+        .st-attribution a {
+            color: #00a4dc;
+            text-decoration: none;
+        }
+
+        /* Empty State */
+        .st-empty {
+            text-align: center;
+            padding: 3em 1em;
+            color: #777;
+        }
+
+        .st-empty-icon {
+            font-size: 3em;
+            margin-bottom: 0.3em;
+        }
+
+        /* Loading */
+        .st-loading {
+            text-align: center;
+            padding: 3em;
+            color: #999;
+        }
+
+        .st-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00a4dc;
+            border-radius: 50%;
+            animation: st-spin 0.8s linear infinite;
+        }
+
+        @keyframes st-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .showTrackerPage { padding: 0.5em 1em; }
+            .st-header { flex-direction: column; align-items: flex-start; }
+            .st-summary { grid-template-columns: repeat(2, 1fr); }
+            .st-show-poster { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div id="ShowTrackerPage" data-role="page" class="page type-interior pluginConfigurationPage showTrackerPage"
+         data-require="emby-button">
+
+        <div class="st-loading" id="stLoading">
+            <div class="st-spinner"></div>
+            <p>Loading scan results...</p>
+        </div>
+
+        <div id="stContent" style="display:none;">
+            <div class="st-header">
+                <div>
+                    <h1>📺 Show Tracker</h1>
+                    <div class="st-meta" id="stMeta"></div>
+                </div>
+                <div class="st-actions">
+                    <button id="stScanBtn" class="st-btn st-btn-primary" title="Run a new scan now">
+                        🔄 Scan Now
+                    </button>
+                    <button id="stClearFilter" class="st-btn st-btn-secondary" title="Clear all filters" style="display:none;">
+                        ✕ Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="st-summary" id="stSummary"></div>
+
+            <div class="st-filters">
+                <input type="text" class="st-search" id="stSearch" placeholder="Search shows...">
+                <select class="st-select" id="stFilter">
+                    <option value="all">All Shows</option>
+                    <option value="missing">Missing Episodes</option>
+                    <option value="complete">Complete</option>
+                    <option value="running">Still Running</option>
+                    <option value="ended">Ended</option>
+                </select>
+                <select class="st-select" id="stSort">
+                    <option value="most-missing">Most Missing</option>
+                    <option value="name-asc">Name A–Z</option>
+                    <option value="name-desc">Name Z–A</option>
+                    <option value="complete-first">Complete First</option>
+                </select>
+            </div>
+
+            <div class="st-show-list" id="stShowList"></div>
+
+            <div class="st-empty" id="stEmpty" style="display:none;">
+                <div class="st-empty-icon">🎉</div>
+                <p>No results to show. Run a scan to check for missing episodes.</p>
+            </div>
+
+            <div class="st-attribution">
+                Data provided by <a href="https://www.tvmaze.com" target="_blank" rel="noopener">TVMaze</a>
+                · Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="showtracker.js?v=1"></script>
+</body>
+</html>
