@@ -53,6 +53,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             {
                 Name = "showtracker",
                 EmbeddedResourcePath = $"{GetType().Namespace}.Pages.showtracker.html",
+                EnableInMainMenu = true,
                 DisplayName = "Show Tracker",
                 MenuSection = "server",
                 MenuIcon = "tv"
