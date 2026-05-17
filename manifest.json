@@ -9,6 +9,14 @@
     "imageUrl": "",
     "versions": [
       {
+        "version": "1.0.1.1",
+        "changelog": "- Fix: the \"Scan Now\" button was partially covered by Jellyfin's fixed top-right header — the top and right edges intercepted clicks. The page now reserves padding to clear the AppBar and the Cast/Search/User icon cluster.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/thenchev/jellyfin-show-tracker-plugin/releases/download/v1.0.1.1/showtracker_1.0.1.1.zip",
+        "checksum": "41e9110c3d6dde1eea1c81cbba9471ef",
+        "timestamp": "2026-05-17T15:31:22Z"
+      },
+      {
         "version": "1.0.1.0",
         "changelog": "- Fix: dashboard page no longer stuck on \"Loading scan results...\" — corrected the embedded script's URL, moved inline styles into the page body so Jellyfin's config-page loader doesn't strip them, and normalized PascalCase responses on the client.\n- Improvement: smarter episode comparison that handles libraries using a different season layout than TVMaze. Falls back to title/airdate matching, detects absolute (anime-style) numbering, and flags shows where the TVMaze match is likely wrong (e.g. anime vs. live-action remake with the same name).\n- New per-show `MatchMode` and `MatchConfidence` fields, surfaced in the dashboard as a \"Match info\" note.",
         "targetAbi": "10.11.0.0",
