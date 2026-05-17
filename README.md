@@ -35,10 +35,13 @@ This is the easiest path. Jellyfin will check the repository URL periodically an
 2. Click **+** and enter:
    - **Repository Name**: `Show Tracker`
    - **Repository URL**: `https://raw.githubusercontent.com/thenchev/jellyfin-show-tracker-plugin/main/manifest.json`
-3. Save, then go to **Dashboard → Plugins → Catalog**
-4. Find **Show Tracker** under *General* and click **Install**
-5. Restart Jellyfin when prompted
-6. Updates: whenever a new version is published, the Catalog will show an **Update** button.
+
+   > ⚠️ Use the `raw.githubusercontent.com` URL above. The GitHub HTML page URL (`https://github.com/.../blob/main/manifest.json`) returns HTML, not JSON, and Jellyfin will silently fail to load the manifest — the plugin will never appear in the Catalog.
+3. Click **Save**. Then go to **Dashboard → Plugins → Catalog** (or the **Available** tab on the Plugins page).
+4. Find **Show Tracker** under the *General* category and click **Install**.
+5. **Restart Jellyfin** when prompted (the plugin will not load until you do).
+6. Verify under **Dashboard → Plugins** — Show Tracker should be listed as *Active*.
+7. **Updates**: whenever a new version is published, the Catalog will show an **Update** button.
 
 ### Method 2: Manual install (one-off DLL drop)
 
